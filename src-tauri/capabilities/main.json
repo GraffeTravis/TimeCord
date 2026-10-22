@@ -1,0 +1,20 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "Commandes métier de Timecord pour sa seule fenêtre locale.",
+  "windows": ["main"],
+  "permissions": [
+    "allow-snapshot",
+    "allow-save-client",
+    "allow-save-project",
+    "allow-save-entry",
+    "allow-delete-entry",
+    "allow-start-timer",
+    "allow-stop-timer",
+    "allow-save-settings",
+    "allow-export-backup",
+    "allow-import-backup",
+    "allow-export-csv",
+    "allow-confirm-action"
+  ]
+}

@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Frontend, renderer and Rust (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Install locked frontend dependencies
+        run: npm ci
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm test
+      - name: Build static frontend
+        run: npm run build
+      - name: Install Chromium for renderer tests
+        run: npx playwright install chromium
+      - name: Playwright (mocked native bridge, synthetic data)
+        run: npm run test:e2e
+      - name: Install pinned Rust toolchain
+        run: rustup show active-toolchain
+      - name: Rust tests (temporary SQLite databases)
+        run: npm run test:rust
+      - name: Clippy
+        run: npm run lint:rust
+      - name: Renderer failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-failures
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
